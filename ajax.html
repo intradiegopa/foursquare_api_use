@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+<script>
+    function vaiSorgenti()
+    {
+        window.open("https://github.com/intradiego/foursquare_api_use");
+    }
+function showVenues() {
+    var near = document.getElementById("near").value;
+    var query = document.getElementById("query").value;
+    var limit = document.getElementById("limit").value;
+    if (( near == "" || query == "")) {
+        document.getElementById("venueslist").innerHTML = "<b>Prego inserire dati nei campi richiesti.</b>";
+        return;
+    } else { 
+        if(limit < 1 || limit > 50)
+       {
+           limit=10;
+           document.getElementById("limit").value=limit;
+       }
+        
+        if (window.XMLHttpRequest) {
+            // code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp = new XMLHttpRequest();
+        } else {
+            // code for IE6, IE5
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                //convert string to json
+                var myArr = JSON.parse(this.responseText);
+                myFunction(myArr);
+            }
+        };
+        xmlhttp.open("GET","/foursquare_api_use/get_data.php?near="+near+"&query="+query+"&limit="+limit+"",true);
+        xmlhttp.send();
+        
+    }
+    function myFunction(arr) {
+    if (arr === null)
+        
+        document.getElementById("venueslist").innerHTML = "<b>Nessun locale-luogo e' stato  trovato,  prego modificare i parametri di ricerca...</b>";
+        
+        else
+        {
+        var i;
+            
+        var table = document.createElement('table');
+        table.setAttribute('class','pure-table pure-table-horizontal');
+         var row = table.insertRow(0);
+            
+            var text = document.createTextNode("Nome locale/luogo");
+            var cell = row.insertCell();
+            cell.setAttribute('align','center');
+            cell.appendChild(text);
+        
+            var text = document.createTextNode("Website");
+            var cell = row.insertCell();
+            cell.setAttribute('align','center');
+            cell.appendChild(text);
+        
+            var text = document.createTextNode("Indirizzo");
+            var cell = row.insertCell();
+            cell.setAttribute('align','center');
+            cell.appendChild(text);
+        
+        var text = document.createTextNode("Latitudine, Longitudine");
+            var cell = row.insertCell();
+            cell.setAttribute('align','center');
+            cell.appendChild(text);
+        
+        for(i = 0; i < arr.length; i++)
+        {
+            var row = table.insertRow(i+1);
+            
+            var text = document.createTextNode(arr[i].name);
+            var cell = row.insertCell();
+            cell.setAttribute('align','center');
+            cell.appendChild(text);
+            
+            var p = document.createElement('p');
+            if (typeof arr[i].url !== 'undefined')
+            {
+                p.innerHTML = 'Website: <a href="'+ arr[i].url + ' " title="'+ arr[i].url +'">'+ arr[i].url +'"</a>.';
+            }else{
+            
+                p = document.createTextNode('Website: non disponibile!');
+                
+            }
+                cell = row.insertCell();
+                cell.setAttribute('align','center');
+                cell.appendChild(p);
+            
+            var location = arr[i].location;
+            var indirizzo = location.formattedAddress;
+            if (typeof indirizzo[0] !== 'undefined' && typeof indirizzo[1] !== 'undefined' && typeof indirizzo[2] !== 'undefined' )
+            {
+                text = document.createTextNode(indirizzo[0]+" "+indirizzo[1]+" "+indirizzo[2]+" ");
+            }else{
+                text = document.createTextNode("indirizzo completo non disponibile.");
+            }
+            cell = row.insertCell();
+            cell.setAttribute('align','center');
+            cell.appendChild(text);
+            
+            var text = document.createTextNode(location.lat+", "+location.lng);
+            var cell = row.insertCell();
+            cell.setAttribute('align','center');
+            cell.appendChild(text);
+        }
+        document.getElementById("venueslist").innerHTML = "";
+        document.getElementById("venueslist").appendChild(table);
+    }
+    }
+}
+</script>
+</head>
+<body>
+ <div style="position: absolute;
+                height: 80%; 
+                width: 80%; 
+                top: 10%; 
+                left: 10%;">
+        Ricerca un luogo o un locale nel database di foursquare.<br><br><br>
+        <form id='form_ricerca' class="pure-form pure-form-aligned">
+            <fieldset>
+                <div class="pure-control-group">
+                    <label for="query">Cosa cerchi:</label>
+                    <input id="query" type="query" placeholder="locale o luogo">
+                    <span class="pure-form-message-inline">Campo richiesto.</span>
+                </div>
+
+                <div class="pure-control-group">
+                    <label for="limit">Quanti risultati desideri:</label>
+                    <input id="limit" type="limit" placeholder="min:1 max:50">
+                </div>
+
+                <div class="pure-control-group">
+                    <label for="near">Nei pressi di:</label>
+                    <input id="near" type="near" placeholder="citta'">
+                    <span class="pure-form-message-inline">Campo richiesto.</span>
+                </div>
+
+
+                <div class="pure-controls">
+                    <input type='button' value='Cerca...' onclick='showVenues();' class="pure-button pure-button-primary">
+                </div>
+            </fieldset>
+        </form>
+     <br><br>
+    <div id="venueslist">
+    <b>I locali trovati saranno mostrati qui...</b>
+    </div>
+     <br><br>
+     <div>
+         <button onclick='vaiSorgenti();' class="pure-button" >Vedi i file sorgenti...</button>
+    </div>
+     </div>
+</body>
+</html>
